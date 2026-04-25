@@ -6,7 +6,11 @@ const Groq = require('groq-sdk');
 const groq = new Groq({ apiKey: process.env.GROQ_KEY });
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:4000', 'https://tradvix.onrender.com'],
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 
 const TTL       = 60000;
 const TTL_LONG  = 300000;
@@ -42,8 +46,8 @@ async function getLiveSymbols() {
   if (cached) return cached;
   try {
     const [gainers, losers, trending] = await Promise.all([
-      yf.dailyGainers({ count: 50 }),
-      yf.dailyLosers({ count: 50 }),
+      yf.screener({ scrIds: 'day_gainers', count: 50 }),
+      yf.screener({ scrIds: 'day_losers', count: 50 }),
       yf.trendingSymbols('US', { count: 20 }),
     ]);
     const all = [...new Set([
@@ -109,7 +113,7 @@ app.get('/api/gainers', async (req,res) => {
   try {
     const cached = getCache('gainers');
     if (cached) return res.json(cached);
-    const data = await yf.dailyGainers({ count: 10 });
+    const data = await yf.screener({ scrIds: 'day_gainers', count: 10 });
     const result = (data?.quotes||[]).map(q=>({
       symbol: q.symbol, name: q.shortName||q.symbol,
       price: q.regularMarketPrice, changesPercentage: q.regularMarketChangePercent,
@@ -125,7 +129,7 @@ app.get('/api/losers', async (req,res) => {
   try {
     const cached = getCache('losers');
     if (cached) return res.json(cached);
-    const data = await yf.dailyLosers({ count: 10 });
+    const data = await yf.screener({ scrIds: 'day_losers', count: 10 });
     const result = (data?.quotes||[]).map(q=>({
       symbol: q.symbol, name: q.shortName||q.symbol,
       price: q.regularMarketPrice, changesPercentage: q.regularMarketChangePercent,
