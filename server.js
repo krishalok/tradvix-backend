@@ -188,7 +188,9 @@ app.get('/api/quotes', async (req,res) => {
   try {
     const c=getCache('quotes');if(c)return res.json(c);
     const symbols=await getLiveSymbols();
-    const raw=await yf.quote(symbols);
+    const sp500=['AAPL','MSFT','NVDA','GOOGL','AMZN','META','TSLA','BRK-B','LLY','AVGO','JPM','V','XOM','UNH','MA','JNJ','WMT','PG','HD','COST'];
+    const allSyms=[...new Set([...symbols,...sp500])];
+    const raw=await yf.quote(allSyms);
     const quotes={};
     for(const q of(Array.isArray(raw)?raw:[raw])){
       if(!q?.symbol||!q?.regularMarketPrice)continue;
