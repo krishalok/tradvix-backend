@@ -30,7 +30,7 @@ const setCache = (k,d,t=TTL)=>{cache[k]={data:d,time:Date.now(),ttl:t};};
 const getCache = (k)=>{const c=cache[k];if(!c)return null;if(Date.now()-c.time>c.ttl){delete cache[k];return null;}return c.data;};
 
 const FALLBACK = [
-  'SPY','QQQ','DIA','IWM',
+  'SPY','QQQ','DIA','IWM','BRK-B','PG','PEP','KO','MRK','ABBV','CRM','ACN','MCD','TXN','LIN','PM','ORCL','CVS','RTX','SCHW',
   'NVDA','AAPL','MSFT','GOOGL','AMZN','META','TSLA','AVGO',
   'AMD','NFLX','JPM','GS','V','MA','BAC','XOM','CVX',
   'LLY','JNJ','UNH','WMT','COST','HD','NKE','BA','CAT','DIS'
@@ -76,7 +76,7 @@ async function getLiveSymbols(){
       yf.screener({scrIds:'day_losers',count:50}),
       yf.trendingSymbols('US',{count:20}),
     ]);
-    const all=[...new Set(['SPY','QQQ','DIA','IWM',
+    const all=[...new Set(['SPY','QQQ','DIA','IWM','BRK-B','PG','PEP','KO','MRK','ABBV','CRM','ACN','MCD','TXN','LIN','PM','ORCL','CVS','RTX','SCHW',
       ...(g?.quotes||[]).map(q=>q.symbol),
       ...(l?.quotes||[]).map(q=>q.symbol),
       ...(t?.quotes||[]).map(q=>q.symbol),
