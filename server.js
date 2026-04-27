@@ -339,13 +339,7 @@ app.get('/api/analyze/:symbol', authMiddleware, async (req,res) => {
     const level=req.query.level||'novice';
     const userTier=req.user?.tier||'free';
 
-    // Tier gating
-    if(level==='intermediate'&&userTier==='free')
-      return res.status(403).json({error:'upgrade_required',message:'Intermediate analysis requires Pro plan',required:'pro'});
-    if(level==='expert'&&userTier==='free')
-      return res.status(403).json({error:'upgrade_required',message:'Expert analysis requires Pro plan',required:'pro'});
-    if(level==='deep'&&userTier!=='premium')
-      return res.status(403).json({error:'upgrade_required',message:'Deep analysis requires Premium plan',required:'premium'});
+    // Analysis levels open to all - chat and research are paid only
 
     const key=`analyze_${sym}_${level}`;
     const c=getCache(key);if(c)return res.json(c);
