@@ -21,8 +21,8 @@ const supabase = createClient(
 const JWT_SECRET = process.env.JWT_SECRET || 'tradvix_secret_2026_xpjduksas';
 
 // ── CACHE ─────────────────────────────────────────
-const TTL      = 60000;
-const TTL_LONG = 300000;
+const TTL      = 300000;
+const TTL_LONG = 600000;
 const TTL_HOUR = 3600000;
 const TTL_DAY  = 86400000;
 let cache = {};
@@ -189,7 +189,7 @@ app.get('/api/quotes', async (req,res) => {
     const c=getCache('quotes');if(c)return res.json(c);
     const symbols=await getLiveSymbols();
     const sp500=['AAPL','MSFT','NVDA','GOOGL','AMZN','META','TSLA','BRK-B','LLY','AVGO','JPM','V','XOM','UNH','MA','JNJ','WMT','PG','HD','COST'];
-    const allSyms=[...new Set([...symbols,...sp500])];
+    const allSyms=[...new Set([...symbols,...sp500])].slice(0,40);
     const raw=await yf.quote(allSyms);
     const quotes={};
     for(const q of(Array.isArray(raw)?raw:[raw])){
