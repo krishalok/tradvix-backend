@@ -14,9 +14,9 @@ app.use(express.json());
 const groq = new Groq({ apiKey: process.env.GROQ_KEY });
 const supabase = createClient(
   'https://xpjduksasbaxhhbgdmiz.supabase.co',
-  process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwamR1a3Nhc2JheGhoYmdkbWl6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzE0NDMxOCwiZXhwIjoyMDkyNzIwMzE4fQ.6EV2pS6T_plKlRrrs4Y-vZChh2HSVt1EX0sAhZoYPj0'
+  process.env.SUPABASE_SERVICE_KEY
 );
-const JWT_SECRET = process.env.JWT_SECRET || 'tradvix_secret_2026_xpjduksas';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 
 
