@@ -138,22 +138,13 @@ app.get('/api/quotes', async (req,res) => {
 app.get('/api/gainers', async (req,res) => {
   try{
     const c=getCache('gainers'); if(c) return res.json(c);
-    // Use quotes and sort by change
-    const quotesCache=getCache('quotes');
-    if(quotesCache){
-      const gainers=Object.entries(quotesCache)
-        .filter(([s,q])=>!['SPY','QQQ','DIA'].includes(s)&&q.dp>0)
-        .sort(([,a],[,b])=>b.dp-a.dp).slice(0,10)
-        .map(([symbol,q])=>({symbol,name:q.name,price:q.c,changesPercentage:q.dp,change:q.d,volume:q.v,marketCap:q.mkt}));
-      setCache('gainers',gainers);
-      return res.json(gainers);
-    }
-    // Fallback - fetch fresh
     const syms = SYMBOLS.slice(3).join(',');
     const data = await tdFetch(`/quote?symbol=${syms}`);
-    const items = Array.isArray(data)?data:Object.values(data).filter(v=>typeof v==='object'&&v?.symbol);
+    const items = typeof data==='object'&&!Array.isArray(data)
+      ? Object.values(data).filter(v=>v&&typeof v==='object'&&v.symbol)
+      : (Array.isArray(data)?data:[]);
     const gainers = items
-      .filter(q=>q?.status!=='error'&&parseFloat(q.percent_change||0)>0)
+      .filter(q=>q?.code!=='error'&&q?.status!=='error'&&parseFloat(q.percent_change||0)>0)
       .sort((a,b)=>parseFloat(b.percent_change||0)-parseFloat(a.percent_change||0))
       .slice(0,10)
       .map(q=>({
@@ -164,7 +155,7 @@ app.get('/api/gainers', async (req,res) => {
         volume:parseInt(q.volume||0),
         marketCap:0
       }));
-    setCache('gainers',gainers);
+    setCache('gainers',gainers,300000);
     res.json(gainers);
   }catch(e){ res.status(500).json({error:e.message}); }
 });
@@ -173,20 +164,13 @@ app.get('/api/gainers', async (req,res) => {
 app.get('/api/losers', async (req,res) => {
   try{
     const c=getCache('losers'); if(c) return res.json(c);
-    const quotesCache=getCache('quotes');
-    if(quotesCache){
-      const losers=Object.entries(quotesCache)
-        .filter(([s,q])=>!['SPY','QQQ','DIA'].includes(s)&&q.dp<0)
-        .sort(([,a],[,b])=>a.dp-b.dp).slice(0,10)
-        .map(([symbol,q])=>({symbol,name:q.name,price:q.c,changesPercentage:q.dp,change:q.d,volume:q.v,marketCap:q.mkt}));
-      setCache('losers',losers);
-      return res.json(losers);
-    }
     const syms = SYMBOLS.slice(3).join(',');
     const data = await tdFetch(`/quote?symbol=${syms}`);
-    const items = Array.isArray(data)?data:Object.values(data).filter(v=>typeof v==='object'&&v?.symbol);
+    const items = typeof data==='object'&&!Array.isArray(data)
+      ? Object.values(data).filter(v=>v&&typeof v==='object'&&v.symbol)
+      : (Array.isArray(data)?data:[]);
     const losers = items
-      .filter(q=>q?.status!=='error'&&parseFloat(q.percent_change||0)<0)
+      .filter(q=>q?.code!=='error'&&q?.status!=='error'&&parseFloat(q.percent_change||0)<0)
       .sort((a,b)=>parseFloat(a.percent_change||0)-parseFloat(b.percent_change||0))
       .slice(0,10)
       .map(q=>({
@@ -197,7 +181,7 @@ app.get('/api/losers', async (req,res) => {
         volume:parseInt(q.volume||0),
         marketCap:0
       }));
-    setCache('losers',losers);
+    setCache('losers',losers,300000);
     res.json(losers);
   }catch(e){ res.status(500).json({error:e.message}); }
 });
